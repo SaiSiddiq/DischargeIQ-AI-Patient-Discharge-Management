@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DischargeIQ - AI Patient Discharge Management Dashboard</title>
+    <!-- Style Sheets -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Chart.js CDN for interactive visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- ==========================================
+         PAGE 2: LOGIN SCREEN OVERLAY
+         ========================================== -->
+    <div id="loginOverlay" class="login-overlay active">
+        <div class="login-card">
+            <!-- Left Panel: Graphic & Tagline -->
+            <div class="login-left">
+                <div class="login-brand">
+                    <div class="login-logo">D</div>
+                    <span class="login-brand-name">DischargeIQ</span>
+                </div>
+                <div class="login-illustration">
+                    <!-- SVG Isometric Hospital/Dashboard Illustration -->
+                    <svg width="240" height="240" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="gridGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#60A5FA" stop-opacity="0.6"/>
+                                <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.1"/>
+                            </linearGradient>
+                            <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#34D399"/>
+                                <stop offset="100%" stop-color="#059669"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Grid Plane (Perspective) -->
+                        <path d="M20 140 L100 80 L180 140 L100 170 Z" fill="url(#gridGrad)" />
+                        <line x1="20" y1="140" x2="180" y2="140" stroke="#93C5FD" stroke-opacity="0.3" stroke-width="1.5" />
+                        <line x1="100" y1="80" x2="100" y2="170" stroke="#93C5FD" stroke-opacity="0.3" stroke-width="1.5" />
+                        <!-- Hospital Building Block -->
+                        <rect x="75" y="50" width="50" height="70" rx="6" fill="#FFFFFF" fill-opacity="0.9" stroke="#2563EB" stroke-width="3" />
+                        <rect x="85" y="60" width="30" height="35" rx="3" fill="#EFF6FF" />
+                        <!-- Medical Cross Symbol -->
+                        <path d="M96 72 H104 M100 68 V76" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round" />
+                        <!-- Floating Glassmorphic Chart Nodes -->
+                        <rect x="35" y="90" width="35" height="25" rx="4" fill="#FFFFFF" fill-opacity="0.95" stroke="#10B981" stroke-width="1.5" />
+                        <circle cx="52.5" cy="102.5" r="5" fill="#10B981" />
+                        <line x1="42" y1="102.5" x2="63" y2="102.5" stroke="#E2E8F0" stroke-width="1.5" />
+                        
+                        <rect x="130" y="85" width="40" height="30" rx="4" fill="#FFFFFF" fill-opacity="0.95" stroke="#EF4444" stroke-width="1.5" />
+                        <path d="M138 105 L146 98 L152 101 L162 94" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <!-- Safety Shield Shield -->
+                        <path d="M100 125 C100 125 115 130 115 140 C115 150 100 158 100 158 C100 158 85 150 85 140 C85 130 100 125 100 125 Z" fill="url(#shieldGrad)" />
+                        <path d="M96 142 H104 M100 138 V146" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div>
+                    <h2>AI-Powered Patient Discharge Management</h2>
+                    <p>Streamline workflows, mitigate readmission risks, and generate clinical summaries using advanced AI predictive scoring.</p>
+                </div>
+                <div class="login-left-circle"></div>
+            </div>
+            <!-- Right Panel: Sign In Form -->
+            <div class="login-right">
+                <div class="login-right-header">
+                    <h3>Sign In to Dashboard</h3>
+                    <p>Enter your professional credentials to continue</p>
+                </div>
+                
+                <div id="loginAlert" class="login-alert">
+                    Invalid email or password. Please try again.
+                </div>
+
+                <form id="loginForm" onsubmit="event.preventDefault(); handleLogin();">
+                    <div class="form-group">
+                        <label class="form-label" for="loginEmail">Clinical Email</label>
+                        <input class="input-field" type="email" id="loginEmail" placeholder="e.g. dr.sharma@hospital.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="loginPassword">Password</label>
+                        <input class="input-field" type="password" id="loginPassword" placeholder="••••••••" required>
+                    </div>
+                    <button class="btn btn-primary" type="submit" style="width: 100%; margin-top: 10px;">
+                        <span>Sign In</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </button>
+                </form>
+
+                <div style="margin-top: 24px; text-align: center;">
+                    <a href="#" style="font-size: 12px; color: var(--text-muted); text-decoration: none;" onclick="alert('Clinical Credentials System: To request clinical credentials or reset your security pass, contact clinical-it@dischargeiq.com'); event.preventDefault();">
+                        🔑 Need security or access assistance?
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==========================================
+         MAIN APPLICATION SHELL (SIDEBAR + MAIN)
+         ========================================== -->
+    <div class="desktop-frame">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div>
+                <div class="sidebar-brand">
+                    <div class="sidebar-logo">D</div>
+                    <span class="brand-text">DischargeIQ</span>
+                </div>
+                <ul class="sidebar-menu">
+                    <li class="sidebar-item active" data-target="dashboard">
+                        <a href="#dashboard">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item" data-target="patients">
+                        <a href="#patients">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            <span>Patients</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item" data-target="summaries">
+                        <a href="#summaries">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            <span>Discharge Summaries</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item" data-target="analytics">
+                        <a href="#analytics">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item" data-target="modelCenter">
+                        <a href="#modelCenter">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="15" x2="23" y2="15"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="15" x2="4" y2="15"></line></svg>
+                            <span>AI Model Center</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item" data-target="notifications">
+                        <a href="#notifications">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                            <span>Notifications</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item" data-target="settings">
+                        <a href="#settings">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            <span>Settings & Admin</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item" data-target="designSystem">
+                        <a href="#design-system" style="border-top: 1px solid var(--border); border-radius: 0; margin-top: 8px; padding-top: 18px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                            <span>Design System Sandbox</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar" id="avatarName">AS</div>
+                    <div class="user-info">
+                        <span class="user-name" id="userName">Dr. Amit Sharma</span>
+                        <span class="user-role">Chief Medical Officer</span>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="handleLogout()" title="Logout">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-wrapper">
+            <!-- Header bar -->
+            <header class="main-header" style="gap: 16px;">
+                <div class="header-left">
+                    <h1 id="pageTitle">Dashboard</h1>
+                </div>
+                
+                <!-- Search Everywhere Bar -->
+                <div class="header-center" style="flex-grow: 1; max-width: 360px; margin: 0 12px;">
+                    <div class="search-wrapper" style="width: 100%; position: relative;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px; position:absolute; left:12px; top:11px; color:var(--text-secondary);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input class="input-field" type="text" id="globalSearchInput" placeholder="Search everywhere (patients, clinical codes, logs)..." style="padding-left: 36px; height: 38px; border-radius: var(--radius-sm);" oninput="handleGlobalSearch(this.value)">
+                        <div id="globalSearchResults" class="search-results-dropdown" style="display:none;"></div>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <!-- Role Selector -->
+                    <div class="role-selector-container" style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; white-space: nowrap;">Role:</span>
+                        <select class="input-field select-field" id="globalRoleSelector" style="height: 38px; padding: 0 32px 0 10px; font-size: 13px; font-weight: 600; border-radius: var(--radius-sm); width: 145px; margin-right: 8px;" onchange="switchUserRole(this.value)">
+                            <option value="CMO">CMO / Doctor</option>
+                            <option value="NURSE">Ward Nurse</option>
+                            <option value="ADMIN">System Admin</option>
+                        </select>
+                    </div>
+
+                    <!-- DB Connection Status Badge -->
+                    <div class="connection-status" id="headerConnectionBadge">
+                        <span class="connection-dot" id="headerConnectionDot"></span>
+                        <span id="headerConnectionText">Neon DB Connected</span>
+                    </div>
+                    <!-- Notification Bell trigger -->
+                    <button class="notify-trigger" onclick="navigateToTab('notifications')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        <span id="unreadBadge" class="notify-dot"></span>
+                    </button>
+                    <!-- Current Date display -->
+                    <div style="font-size: 13px; font-weight: 500; color: var(--text-secondary); background-color: var(--background); padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                        📅 <span id="currentDate">June 24, 2026</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Views Wrapper -->
+            <div class="content-body">
+
+                <!-- ==========================================
+                     PAGE 3: MAIN DASHBOARD VIEW
+                     ========================================== -->
+                <!-- ==========================================
+                     PAGE 3: MAIN CLINICAL COCKPIT DASHBOARD
+                     ========================================== -->
+                <section id="dashboard" class="page-view active">
+                    <!-- Quick Actions Bar -->
+                    <div class="quick-actions-bar">
+                        <span class="quick-actions-title">Clinical Cockpit Actions</span>
+                        <button class="btn btn-primary btn-sm" onclick="openNewPatientModal()">+ Register New Inpatient</button>
+                        <button class="btn btn-secondary btn-sm" onclick="navigateToTab('patients')">📋 View Inpatient Roster</button>
+                        <button class="btn btn-secondary btn-sm" onclick="downloadSummaryPDF()">📊 Export Clinical Census</button>
+                        <button class="btn btn-secondary btn-sm" onclick="alert('Scheduling System: Connecting to HL7 calendar scheduler...'); event.preventDefault();">📅 Schedule Follow-up Visit</button>
+                    </div>
+
+                    <!-- Upgraded KPI cards with sparkline containers -->
+                    <div class="kpi-container" style="margin-bottom: 24px;">
+                        <div class="kpi-card-upgraded">
+                            <div class="kpi-header-row">
+                                <span class="kpi-label">Active Census</span>
+                                <span class="kpi-trend-badge up">↑ 12%</span>
+                            </div>
+                            <span class="kpi-val" id="kpiTotalPatients">--</span>
+                            <canvas id="sparklineTotal" class="kpi-sparkline-canvas"></canvas>
+                        </div>
+                        <div class="kpi-card-upgraded">
+                            <div class="kpi-header-row">
+                                <span class="kpi-label">Pending Clearance</span>
+                                <span class="kpi-trend-badge up">↑ 8%</span>
+                            </div>
+                            <span class="kpi-val" id="kpiReadyPatients">--</span>
+                            <canvas id="sparklineReady" class="kpi-sparkline-canvas"></canvas>
+                        </div>
+                        <div class="kpi-card-upgraded">
+                            <div class="kpi-header-row">
+                                <span class="kpi-label">Awaiting Sign-off</span>
+                                <span class="kpi-trend-badge down">↓ 4%</span>
+                            </div>
+                            <span class="kpi-val" id="kpiPendingApproval">--</span>
+                            <canvas id="sparklinePending" class="kpi-sparkline-canvas"></canvas>
+                        </div>
+                        <div class="kpi-card-upgraded">
+                            <div class="kpi-header-row">
+                                <span class="kpi-label">Critical Readmit Risk</span>
+                                <span class="kpi-trend-badge up" style="background-color: var(--danger-light); color: var(--danger);">↑ 2%</span>
+                            </div>
+                            <span class="kpi-val" id="kpiHighRisk">--</span>
+                            <canvas id="sparklineRisk" class="kpi-sparkline-canvas"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Grid Row 1: AI Insights + Discharge Trend Chart -->
+                    <div class="dashboard-split-row">
+                        <!-- AI Insights Panel (col-4) -->
+                        <div class="card col-4 ai-insights-card">
+                            <div class="ai-insights-header">
+                                <span class="ai-insights-title">
+                                    <svg class="ai-sparkle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#7C3AED;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                    AI Risk Insights
+                                </span>
+                                <span style="font-size: 11px; color: #7C3AED; font-weight: 700;">Live Feed</span>
+                            </div>
+                            <div id="aiInsightsList" style="display:flex; flex-direction:column; gap:10px;">
+                                <!-- Filled by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Discharge Trend Chart (col-8) -->
+                        <div class="card col-8">
+                            <div class="card-header">
+                                <h3 class="card-title">Discharge Trend Analysis</h3>
+                                <span style="font-size: 12px; color: var(--text-secondary); font-weight: 500;">Last 7 Days (Clinical discharge vs alarms)</span>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="trendChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Grid Row 2: Doctor Approval Queue + Discharge Pipeline -->
+                    <div class="dashboard-split-row">
+                        <!-- Approval Queue (col-5) -->
+                        <div class="card col-5">
+                            <div class="card-header">
+                                <h3 class="card-title">Pending Approvals Queue</h3>
+                                <span class="badge badge-pending" id="queueCount">0 pending</span>
+                            </div>
+                            <div class="approval-queue-list" id="doctorApprovalQueue" style="margin-top:10px; max-height:220px; overflow-y:auto;">
+                                <!-- Dynamic review items from JS -->
+                            </div>
+                        </div>
+
+                        <!-- Discharge Pipeline Widget (col-7) -->
+                        <div class="card col-7">
+                            <div class="card-header">
+                                <h3 class="card-title">Active Discharge Pipeline</h3>
+                                <span style="font-size: 11px; color: var(--text-muted); font-weight:600;">EHR Census Tracking</span>
+                            </div>
+                            <div class="pipeline-flow-wrapper" id="pipelineStepper" style="margin-top:20px;">
+                                <!-- Dynamic step counts from JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Grid Row 3: Risk Heatmap + Recent Discharge Requests -->
+                    <div class="dashboard-split-row">
+                        <!-- Risk Heatmap (col-4) -->
+                        <div class="card col-4">
+                            <div class="card-header">
+                                <h3 class="card-title">Predictive Risk Heatmap</h3>
+                                <span style="font-size: 11px; color: var(--text-muted); font-weight:600;">SHAP Classification</span>
+                            </div>
+                            <div class="table-container" style="border:none;">
+                                <table class="risk-heatmap-table" id="riskHeatmap">
+                                    <thead>
+                                        <tr style="border-bottom: 1.5px solid var(--border);">
+                                            <th style="font-size:11px; padding: 8px 12px; text-align:left; color:var(--text-secondary); text-transform:uppercase; font-weight:600;">Patient</th>
+                                            <th style="font-size:11px; padding: 8px 12px; text-align:left; color:var(--text-secondary); text-transform:uppercase; font-weight:600;">Dept</th>
+                                            <th style="font-size:11px; padding: 8px 12px; text-align:right; color:var(--text-secondary); text-transform:uppercase; font-weight:600; padding-right:16px;">Risk</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dynamic Heatmap rows from JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Patient Preview Table (col-8) -->
+                        <div class="card col-8">
+                            <div class="card-header">
+                                <h3 class="card-title">Recent Discharge Requests</h3>
+                                <button class="btn btn-secondary btn-sm" onclick="navigateToTab('patients')">View All Patients</button>
+                            </div>
+                            <div class="table-container">
+                                <table class="table" id="dashboardPatientsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Patient ID</th>
+                                            <th>Name</th>
+                                            <th>Department</th>
+                                            <th>Risk Score</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dynamically filled by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Grid Row 4: Predictive readmissions forecast + metrics -->
+                    <div class="dashboard-split-row">
+                        <div class="card col-8">
+                            <div class="card-header">
+                                <h3 class="card-title">Predicted Readmissions Next 30 Days</h3>
+                                <span style="font-size: 12px; color: var(--text-secondary);">Random Forest Regression Model</span>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="predictedReadmissionsChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="card col-4">
+                            <div class="card-header">
+                                <h3 class="card-title">Hospital Operational KPIs</h3>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:16px; margin-top: 10px;">
+                                <div class="db-stat-row">
+                                    <span>Bed Occupancy Rate</span>
+                                    <strong style="color:var(--primary); font-size:16px;">78.5%</strong>
+                                </div>
+                                <div class="db-stat-row">
+                                    <span>Avg Discharge Process Time</span>
+                                    <strong style="color:var(--success); font-size:16px;">3.4 hrs</strong>
+                                </div>
+                                <div class="db-stat-row">
+                                    <span>Hospital Readmission Rate</span>
+                                    <strong style="color:var(--danger); font-size:16px;">11.8%</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     PAGE 4: PATIENT LIST VIEW
+                     ========================================== -->
+                <section id="patients" class="page-view">
+                    <div class="filter-bar">
+                        <div class="search-wrapper">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input class="input-field" type="text" id="patientSearch" placeholder="Search patients by name, ID or diagnosis..." oninput="filterPatients()">
+                        </div>
+                        <select class="input-field select-field filter-select" id="filterDept" onchange="filterPatients()">
+                            <option value="All">All Departments</option>
+                            <option value="Cardiology">Cardiology</option>
+                            <option value="Neurology">Neurology</option>
+                            <option value="Orthopedics">Orthopedics</option>
+                            <option value="Pediatrics">Pediatrics</option>
+                            <option value="General Medicine">General Medicine</option>
+                        </select>
+                        <select class="input-field select-field filter-select" id="filterRisk" onchange="filterPatients()">
+                            <option value="All">All Risk Levels</option>
+                            <option value="High">High Risk (&ge;70%)</option>
+                            <option value="Medium">Medium Risk (40-69%)</option>
+                            <option value="Low">Low Risk (&lt;40%)</option>
+                        </select>
+                        <select class="input-field select-field filter-select" id="filterStatus" onchange="filterPatients()">
+                            <option value="All">All Statuses</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Review">Review</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Discharged">Discharged</option>
+                        </select>
+                    </div>
+
+                    <div class="card" style="padding: 0; overflow: hidden;">
+                        <div class="table-container" style="border: none;">
+                            <table class="table" id="patientsListTable">
+                                <thead>
+                                    <tr>
+                                        <th>Patient ID</th>
+                                        <th>Name</th>
+                                        <th>Age</th>
+                                        <th>Department</th>
+                                        <th>Risk Score</th>
+                                        <th>Status</th>
+                                        <th style="text-align: right; padding-right: 24px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Dynamic rows from JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     PAGE 5: PATIENT DETAILS VIEW
+                     ========================================== -->
+                <section id="patientDetails" class="page-view">
+                    <!-- Top breadcrumb / navigation bar -->
+                    <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+                        <button class="btn btn-secondary" onclick="navigateToTab('patients')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                            Back to Patient List
+                        </button>
+                        <button class="btn btn-primary" id="detailsGenerateSummaryBtn">
+                            ⚡ Generate AI Summary
+                        </button>
+                    </div>
+
+                    <div class="details-grid">
+                        <!-- Left Panel: Clinical Profile Info -->
+                        <div class="card">
+                            <div class="patient-profile-card" style="margin-bottom: 20px;">
+                                <div class="patient-big-avatar" id="detailsAvatar">--</div>
+                                <div class="patient-meta-header">
+                                    <h2 id="detailsName">--</h2>
+                                    <div class="patient-submeta">
+                                        <span>ID: <strong id="detailsId">--</strong></span>
+                                        <span>•</span>
+                                        <span>Age/Sex: <strong id="detailsAgeSex">--</strong></span>
+                                        <span>•</span>
+                                        <span>Dept: <strong id="detailsDept">--</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="clinical-grid">
+                                <div class="clinical-item">
+                                    <span class="clinical-label">Current Diagnosis</span>
+                                    <span class="clinical-val" id="detailsDiagnosis">--</span>
+                                </div>
+                                <div class="clinical-item">
+                                    <span class="clinical-label">Attending Clinician</span>
+                                    <span class="clinical-val" id="detailsDoctor">--</span>
+                                </div>
+                                <div class="clinical-item">
+                                    <span class="clinical-label">Admission Date</span>
+                                    <span class="clinical-val" id="detailsAdmissionDate">June 18, 2026</span>
+                                </div>
+                                <div class="clinical-item">
+                                    <span class="clinical-label">Current Discharge Status</span>
+                                    <div><span class="badge" id="detailsStatusBadge">--</span></div>
+                                </div>
+                            </div>
+
+                            <h4 class="clinical-section-title">Clinical History & Pre-existing Conditions</h4>
+                            <div style="font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 20px;" id="detailsHistory">
+                                --
+                            </div>
+
+                            <h4 class="clinical-section-title">Active Inpatient Medications</h4>
+                            <ul class="med-list" id="detailsMedications">
+                                <!-- Filled by JS -->
+                            </ul>
+                        </div>
+
+                        <!-- Right Panel: AI Predictions & Recommendations -->
+                        <div style="display: flex; flex-direction: column; gap: 24px;">
+                            <!-- AI readmission prediction widget -->
+                            <div class="card ai-prediction-card">
+                                <div class="ai-header">
+                                    <span class="ai-title">
+                                        <svg class="ai-sparkle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                        AI Readmission Risk Engine
+                                    </span>
+                                    <span style="font-size: 11px; color: #A78BFA; font-weight: 500;">Model v2.4-MD</span>
+                                </div>
+
+                                <div class="ai-risk-meter-wrapper">
+                                    <div>
+                                        <div class="ai-score-big" id="detailsRiskScore">--%</div>
+                                        <div class="ai-score-label">Readmission Probability</div>
+                                    </div>
+                                    <span class="ai-risk-level" id="detailsRiskLevel">--</span>
+                                </div>
+
+                                <h5 style="font-size: 12px; color: #E2E8F0; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em;">Key Risk Factors</h5>
+                                <ul class="factors-list" id="detailsRiskFactors" style="margin-bottom: 12px;">
+                                    <!-- Filled by JS -->
+                                </ul>
+
+                                <!-- SHAP Explainability Sub-Panel -->
+                                <div class="shap-explainability-panel" style="margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 12px;">
+                                    <h5 style="font-size: 11px; color: #E2E8F0; font-weight: 600; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.05em; display:flex; justify-content:space-between; align-items:center;">
+                                         <span>SHAP Feature Attribution</span>
+                                         <span style="font-size: 9px; color:#A78BFA; background:rgba(167, 139, 250, 0.15); padding: 2px 6px; border-radius:3px; font-weight:700;">Interactive</span>
+                                    </h5>
+                                    <div style="display:flex; flex-direction:column; gap:8px;" id="detailsShapFactors">
+                                         <!-- Interactive SHAP items filled by JS -->
+                                    </div>
+                                </div>
+
+                                <p style="font-size: 11px; color: #94A3B8; line-height: 1.4; margin-top: 12px;">
+                                    * Prediction is based on patient history, vital stability, and social support indexes. Click a SHAP bar to audit factor details.
+                                </p>
+                            </div>
+
+                            <!-- Clinical Discharge Pathway (Vertical Timeline) -->
+                            <div class="card">
+                                <div class="card-header" style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">
+                                    <h3 class="card-title">Clinical Discharge Pathway</h3>
+                                    <span style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">EHR Stepper</span>
+                                </div>
+                                <div class="vertical-timeline" id="detailsVerticalTimeline">
+                                    <!-- Dynamic workflow steps filled by JS -->
+                                </div>
+                            </div>
+
+                            <!-- AI Clinical Recommendations -->
+                            <div class="card">
+                                <div class="card-header" style="margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">
+                                    <h3 class="card-title">🤖 AI Clinical Recommendations</h3>
+                                    <span style="font-size: 10px; color: var(--primary); background: var(--primary-light); padding: 2px 6px; border-radius: 4px; font-weight: 700;">Protocol Active</span>
+                                </div>
+                                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">Active evidence-based care bundles recommended to prevent readmission:</p>
+                                <div style="display: flex; flex-direction: column; gap: 8px;" id="detailsRecommendations">
+                                    <!-- Filled dynamically by JS -->
+                                </div>
+                            </div>
+
+                            <!-- Recommendations check-sheet -->
+                            <div class="card">
+                                <div class="card-header" style="margin-bottom: 8px;">
+                                    <h3 class="card-title">Discharge Checklist</h3>
+                                    <span style="font-size: 12px; color: var(--text-muted);" id="detailsChecklistProgress">0/3</span>
+                                </div>
+                                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Complete all clinical tasks before approving discharge:</p>
+                                <div class="rec-checklist" id="detailsChecklist">
+                                    <!-- Dynamic checklist items -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     PAGE 6: AI DISCHARGE SUMMARY
+                     ========================================== -->
+                <section id="summaries" class="page-view">
+                    <div class="summary-split">
+                        <!-- Left Pane: AI Editor -->
+                        <div class="card">
+                            <div class="summary-meta-top">
+                                <div>
+                                    <h2 style="font-size: 18px; font-weight: 700;" id="summaryPatientName">Select a Patient</h2>
+                                    <span style="font-size: 12px; color: var(--text-secondary);" id="summaryPatientMeta">Generate summary via Patient List or click a patient.</span>
+                                </div>
+                                <div>
+                                    <span class="badge badge-review" id="summaryStatus">Pending</span>
+                                </div>
+                            </div>
+
+                            <form id="summaryEditorForm" style="margin-top: 16px;">
+                                <div class="form-group">
+                                    <label class="form-label">1. Patient Overview</label>
+                                    <textarea class="editor-textarea" id="sumOverview" placeholder="Patient background, admitting complaint and summary..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">2. Discharge Diagnosis & Treatment Summary</label>
+                                    <textarea class="editor-textarea" id="sumDiagnosis" placeholder="Final diagnoses, clinical procedures, inpatient response..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">3. Reconciliation Medications Plan</label>
+                                    <textarea class="editor-textarea" id="sumMeds" placeholder="Discharge medication names, dosages, frequency, and instructions..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">4. Clinical Follow-up Instructions</label>
+                                    <textarea class="editor-textarea" id="sumFollowup" placeholder="Recommendations on clinical visits, alarm symptoms, and lifestyle advice..."></textarea>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Right Pane: Actions -->
+                        <div class="summary-actions-sidebar">
+                            <div class="card">
+                                <h3 class="card-title" style="margin-bottom: 12px;">Doctor Action Console</h3>
+                                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+                                    As the attending clinician, review and adjust the AI-generated blocks. Once satisfied, perform one of the actions below.
+                                </p>
+                                
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    <button class="btn btn-primary" onclick="approveDischargeSummary()" id="btnApproveSummary" style="width: 100%;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                        Approve & Sign Discharge
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="requestCorrection()" style="width: 100%;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"></path></svg>
+                                        Request Clarification
+                                    </button>
+                                    <button class="btn btn-danger" onclick="rejectDischargeSummary()" style="width: 100%;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                                        Reject Discharge Request
+                                    </button>
+                                    <button class="btn btn-outline" onclick="downloadSummaryPDF()" style="width: 100%;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                        Download PDF Export
+                                    </button>
+                                    <button class="btn btn-outline" onclick="openInteropModal()" style="width: 100%; border-color:#8B5CF6; color:#8B5CF6; margin-top: 4px;">
+                                        🧬 HL7 / FHIR Interop Exporter
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="card summary-status-card">
+                                <h4 style="font-size: 13px; font-weight: 600; color: var(--text-primary); text-transform: uppercase;">Review Metadata</h4>
+                                <div class="summary-status-item" style="display:flex; flex-direction:column; align-items:stretch; gap:6px;">
+                                    <div style="display:flex; justify-content:space-between; width:100%;">
+                                        <span>AI Suggestion Confidence</span>
+                                        <span id="metadataConfidence" style="font-weight: 700; color: var(--success);">--</span>
+                                    </div>
+                                    <div class="confidence-progress-bg">
+                                        <div id="metadataConfidenceBar" class="confidence-progress-fill" style="background-color: var(--success); width: 0%;"></div>
+                                    </div>
+                                </div>
+                                <div class="summary-status-item">
+                                    <span>Last Generated At</span>
+                                    <span id="metadataTime">--</span>
+                                </div>
+                                <div class="summary-status-item">
+                                    <span>Assigned Clinician</span>
+                                    <span id="metadataDoctor">--</span>
+                                </div>
+                                <div class="summary-status-item" style="border-top: 1px solid var(--border); padding-top: 8px; margin-top: 4px;">
+                                    <span>Integrity Status</span>
+                                    <span style="color: var(--success); display: inline-flex; align-items: center; gap: 4px;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                        Verified HL7
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     PAGE 7: READMISSION ANALYTICS
+                     ========================================== -->
+                <section id="analytics" class="page-view">
+                    <div class="kpi-container">
+                        <div class="kpi-card">
+                            <div class="kpi-icon-wrapper" style="background-color: var(--danger-light); color: var(--danger);">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                            </div>
+                            <div class="kpi-info">
+                                <span class="kpi-val" id="analyticsHighRisk">--</span>
+                                <span class="kpi-label">High Risk Patients</span>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon-wrapper" style="background-color: var(--warning-light); color: var(--warning);">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                            </div>
+                            <div class="kpi-info">
+                                <span class="kpi-val" id="analyticsAvgRisk">--%</span>
+                                <span class="kpi-label">Average Risk Score</span>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon-wrapper" style="background-color: var(--success-light); color: var(--success);">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                            </div>
+                            <div class="kpi-info">
+                                <span class="kpi-val" id="analyticsAvgStay">6.8 days</span>
+                                <span class="kpi-label">Average Length of Stay</span>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon-wrapper" style="background-color: var(--primary-light); color: var(--primary);">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            </div>
+                            <div class="kpi-info">
+                                <span class="kpi-val" id="analyticsTotalAudits">--</span>
+                                <span class="kpi-label">Safety Audits Ran</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analytics-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Risk Level Distribution</h3>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="riskDistChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Readmission History (Monthly)</h3>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="monthlyReadmissionChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="card analytics-full-width">
+                            <div class="card-header">
+                                <h3 class="card-title">Primary Readmission Driver Factors</h3>
+                            </div>
+                            <div class="chart-wrapper" style="height: 240px;">
+                                <canvas id="driversChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     PAGE 10: AI MODEL MONITORING CENTER
+                     ========================================== -->
+                <section id="modelCenter" class="page-view">
+                    <!-- Model Health Metrics -->
+                    <div class="kpi-container" style="margin-bottom: 24px;">
+                        <div class="kpi-card-upgraded">
+                            <div class="kpi-header-row">
+                                <span class="kpi-label">Model Accuracy (ROC AUC)</span>
+                                <span class="kpi-trend-badge up" style="background-color: var(--success-light); color: var(--success); font-weight:700;">↑ 0.892</span>
+                            </div>
+                            <span class="kpi-val">89.2%</span>
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:4px; font-weight:500;">Target Threshold: &ge; 85%</div>
+                        </div>
+                        <div class="kpi-card-upgraded">
+                            <div class="kpi-header-row">
+                                <span class="kpi-label">Model Drift Index (PSI)</span>
+                                <span class="kpi-trend-badge down" style="background-color: var(--success-light); color: var(--success); font-weight:700;">Stable</span>
+                            </div>
+                            <span class="kpi-val">0.042</span>
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:4px; font-weight:500;">Population Stability Index</div>
+                        </div>
+                        <div class="kpi-card-upgraded">
+                            <div class="kpi-header-row">
+                                <span class="kpi-label">F1-Score (High Risk)</span>
+                                <span class="kpi-trend-badge up" style="background-color: var(--success-light); color: var(--success); font-weight:700;">↑ 0.841</span>
+                            </div>
+                            <span class="kpi-val">84.1%</span>
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:4px; font-weight:500;">Precision-Recall Balance</div>
+                        </div>
+                        <div class="kpi-card-upgraded">
+                            <div class="kpi-header-row">
+                                <span class="kpi-label">Total Predictions Evaluated</span>
+                                <span class="kpi-trend-badge up" style="font-weight:700;">↑ 4,281</span>
+                            </div>
+                            <span class="kpi-val">12,482</span>
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:4px; font-weight:500;">Clinical Inferences Run</div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-split-row">
+                        <!-- Model Feature Importance (col-6) -->
+                        <div class="card col-6">
+                            <div class="card-header">
+                                <h3 class="card-title">SHAP Global Feature Importance</h3>
+                                <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Mean Absolute SHAP Value</span>
+                            </div>
+                            <div class="chart-wrapper" style="height: 250px;">
+                                <canvas id="modelFeatureImportanceChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Model Drift Over Time (col-6) -->
+                        <div class="card col-6">
+                            <div class="card-header">
+                                <h3 class="card-title">Model Calibration & Drift (12 Weeks)</h3>
+                                <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Expected vs Observed Calibration</span>
+                            </div>
+                            <div class="chart-wrapper" style="height: 250px;">
+                                <canvas id="modelDriftChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-split-row" style="margin-top: 24px;">
+                        <!-- Prediction Risk Score Distribution (col-7) -->
+                        <div class="card col-7">
+                            <div class="card-header">
+                                <h3 class="card-title">Prediction Distribution Density</h3>
+                                <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Active Census Prediction Density</span>
+                            </div>
+                            <div class="chart-wrapper" style="height: 250px;">
+                                <canvas id="modelPredictionDistChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Model training logs (col-5) -->
+                        <div class="card col-5">
+                            <div class="card-header">
+                                <h3 class="card-title">Model Retraining & Deploy Logs</h3>
+                                <span class="badge badge-approved">v2.4-MD Active</span>
+                            </div>
+                            <div class="model-logs-terminal" id="modelRetrainLogs" style="height: 250px; overflow-y:auto; font-family:'JetBrains Mono', 'Fira Code', monospace; white-space:pre-wrap;">
+                                <!-- Managed by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     PAGE 8: NOTIFICATIONS TIMELINE
+                     ========================================== -->
+                <section id="notifications" class="page-view">
+                    <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                        <span style="font-size: 14px; color: var(--text-secondary);" id="notifySummaryText">You have 0 unread alerts.</span>
+                        <div class="notification-filters" style="display: flex; gap: 8px;">
+                            <button class="btn btn-secondary btn-sm" id="btnNotifyFilterAll" onclick="filterNotifications('all')" style="border-radius:var(--radius-sm); font-weight:600;">All</button>
+                            <button class="btn btn-secondary btn-sm" id="btnNotifyFilterCritical" onclick="filterNotifications('critical')" style="border-radius:var(--radius-sm); font-weight:600;">🚨 Critical</button>
+                            <button class="btn btn-secondary btn-sm" id="btnNotifyFilterPending" onclick="filterNotifications('pending')" style="border-radius:var(--radius-sm); font-weight:600;">⏳ Pending</button>
+                            <button class="btn btn-secondary btn-sm" id="btnNotifyFilterCompleted" onclick="filterNotifications('completed')" style="border-radius:var(--radius-sm); font-weight:600;">✅ Completed</button>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="markAllNotificationsRead()" style="font-weight:600;">Mark All as Read</button>
+                    </div>
+
+                    <div class="notifications-timeline" id="notificationsFeed">
+                        <!-- Filled Dynamically by JS -->
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     PAGE 9: ADMIN PANEL & SETTINGS
+                     ========================================== -->
+                <section id="settings" class="page-view">
+                    <div class="settings-layout">
+                        <!-- Left Navigation Tabs -->
+                        <ul class="settings-nav">
+                            <li class="settings-nav-item active" data-tab="doctors">
+                                <button onclick="switchSettingsTab('doctors')">👨‍⚕️ Clinicians</button>
+                            </li>
+                            <li class="settings-nav-item" data-tab="departments">
+                                <button onclick="switchSettingsTab('departments')">🏢 Departments</button>
+                            </li>
+                            <li class="settings-nav-item" data-tab="roles">
+                                <button onclick="switchSettingsTab('roles')">🔑 User Roles</button>
+                            </li>
+                            <li class="settings-nav-item" data-tab="ai-settings">
+                                <button onclick="switchSettingsTab('ai-settings')">🤖 AI Engine Parameters</button>
+                            </li>
+                            <li class="settings-nav-item" data-tab="audit">
+                                <button onclick="switchSettingsTab('audit')">📜 System Audit Logs</button>
+                            </li>
+                            <li class="settings-nav-item" data-tab="database">
+                                <button onclick="switchSettingsTab('database')">🛢️ PostgreSQL Sync</button>
+                            </li>
+                        </ul>
+
+                        <!-- Right Panel Contents -->
+                        <div class="card" style="min-height: 400px;">
+                            <!-- Settings Tab 1: Clinicians -->
+                            <div id="settings-doctors" class="settings-panel active">
+                                <div class="settings-panel-title">Manage Clinicians</div>
+                                <div class="table-container" style="margin-bottom: 20px;">
+                                    <table class="table" id="doctorsSettingsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Role</th>
+                                                <th>Department</th>
+                                                <th>Active Discharges</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Managed dynamically -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="alert('Doctor registration modal mock: In production this connects to Active Directory.')">
+                                    + Register New Clinician
+                                </button>
+                            </div>
+
+                            <!-- Settings Tab 2: Departments -->
+                            <div id="settings-departments" class="settings-panel">
+                                <div class="settings-panel-title">Manage Hospital Wards & Departments</div>
+                                <div class="table-container" style="margin-bottom: 20px;">
+                                    <table class="table" id="deptSettingsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Department Name</th>
+                                                <th>Active Beds</th>
+                                                <th>Discharge Rate</th>
+                                                <th>Readmission Threshold</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Filled by JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Settings Tab 3: User Roles -->
+                            <div id="settings-roles" class="settings-panel">
+                                <div class="settings-panel-title">Access Control Matrix (RBAC)</div>
+                                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;">
+                                    Map user roles to access levels. In compliance with HIPAA, actions like "Generate Summaries" and "Sign Off" require authorized clinician status.
+                                </p>
+                                <div class="table-container">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Role Name</th>
+                                                <th>View Data</th>
+                                                <th>Edit Profile</th>
+                                                <th>Generate AI Summaries</th>
+                                                <th>Sign & Approve Discharges</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>Chief Medical Officer</strong></td>
+                                                <td>✅ Yes</td>
+                                                <td>✅ Yes</td>
+                                                <td>✅ Yes</td>
+                                                <td>✅ Yes</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Attending Physician</strong></td>
+                                                <td>✅ Yes</td>
+                                                <td>✅ Yes</td>
+                                                <td>✅ Yes</td>
+                                                <td>✅ Yes</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Resident Doctor</strong></td>
+                                                <td>✅ Yes</td>
+                                                <td>✅ Yes</td>
+                                                <td>✅ Yes</td>
+                                                <td>❌ No</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Ward Nurse</strong></td>
+                                                <td>✅ Yes</td>
+                                                <td>✅ Yes</td>
+                                                <td>❌ No</td>
+                                                <td>❌ No</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Settings Tab 4: AI Parameters -->
+                            <div id="settings-ai-settings" class="settings-panel">
+                                <div class="settings-panel-title">AI Discharge Predictor settings</div>
+                                <form onsubmit="event.preventDefault(); saveAISettings();">
+                                    <div class="range-slider-group">
+                                        <label class="form-label" style="display:flex; justify-content:space-between;">
+                                            <span>High Risk Alarm Threshold (Red Zone)</span>
+                                            <span style="font-weight: 700; color: var(--danger);" id="valThresholdHigh">70%</span>
+                                        </label>
+                                        <input type="range" class="range-slider" min="50" max="90" value="70" id="slideThresholdHigh" oninput="document.getElementById('valThresholdHigh').textContent = this.value + '%'">
+                                        <div class="slider-labels"><span>Sensitive</span><span>Strict (Less Alarms)</span></div>
+                                    </div>
+
+                                    <div class="range-slider-group">
+                                        <label class="form-label" style="display:flex; justify-content:space-between;">
+                                            <span>Medium Risk Alarm Threshold (Yellow Zone)</span>
+                                            <span style="font-weight: 700; color: var(--warning);" id="valThresholdMedium">40%</span>
+                                        </label>
+                                        <input type="range" class="range-slider" min="20" max="49" value="40" id="slideThresholdMedium" oninput="document.getElementById('valThresholdMedium').textContent = this.value + '%'">
+                                        <div class="slider-labels"><span>Early warning</span><span>Moderate</span></div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="selectAIModel">Active Foundation Model Version</label>
+                                        <select class="input-field select-field" id="selectAIModel">
+                                            <option value="discharge-llama-70b-v2.4">discharge-llama-70b-v2.4 (Fine-Tuned Clinician LLM)</option>
+                                            <option value="gemini-1.5-pro-discharge">Gemini 1.5 Pro (Clinical Health Variant)</option>
+                                            <option value="discharge-bert-classifier">DischargeIQ BERT classifier (Fast / Rule-Based)</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="selectExplainability">AI Summary Style</label>
+                                        <select class="input-field select-field" id="selectExplainability">
+                                            <option value="structured">Structured Clinical SOAP format (Default)</option>
+                                            <option value="narrative">Free-form Narrative overview</option>
+                                            <option value="brief">Minimal Bulleted Checklist</option>
+                                        </select>
+                                    </div>
+
+                                    <button class="btn btn-primary" type="submit" style="margin-top: 10px;">Save AI Configurations</button>
+                                </form>
+                            </div>
+
+                            <!-- Settings Tab 5: Audit Log -->
+                            <div id="settings-audit" class="settings-panel">
+                                <div class="settings-panel-title">HIPAA Compliant System Audit Logs</div>
+                                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+                                    Real-time tracking of patient data accesses and LLM inferences. Protected under strict privacy regulation.
+                                </p>
+                                <div class="audit-viewport" id="auditLogsViewport">
+                                    <!-- Dynamic logs filled here -->
+                                </div>
+                            </div>
+
+                            <!-- Settings Tab 6: Database Connection Console -->
+                            <div id="settings-database" class="settings-panel">
+                                <div class="settings-panel-title">PostgreSQL Database Connection Manager</div>
+                                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+                                    DischargeIQ uses a Neon serverless PostgreSQL connection pool for HIPAA-compliant clinical data persistence. Map database metrics and sync datasets online here.
+                                </p>
+                                
+                                <div class="db-console-card">
+                                    <div class="db-stat-row">
+                                        <span>Database Host</span>
+                                        <strong>neon-postgres-pool.us-east-2.neon.tech</strong>
+                                    </div>
+                                    <div class="db-stat-row">
+                                        <span>Connection Mode</span>
+                                        <strong style="color:var(--success);">SSL Active (jdbc:postgresql://)</strong>
+                                    </div>
+                                    <div class="db-stat-row">
+                                        <span>Active Connection Pools</span>
+                                        <strong id="dbPoolsCount">12 / 20 connections</strong>
+                                    </div>
+                                    <div class="db-stat-row">
+                                        <span>Current Connection Latency</span>
+                                        <strong id="dbPingLatency" style="color:var(--success);">14 ms</strong>
+                                    </div>
+                                    <div class="db-stat-row">
+                                        <span>Last EHR Online Synchronization</span>
+                                        <strong id="dbSyncTime">June 24, 2026 11:34 AM</strong>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; gap:12px;">
+                                    <button class="btn btn-primary btn-sm" onclick="pingDatabaseConnection()" id="btnTestDBConnection">
+                                        ⚡ Test Database Latency Ping
+                                    </button>
+                                    <button class="btn btn-secondary btn-sm" onclick="syncOnlineClinicalData()" id="btnSyncEHRData">
+                                        🔄 Sync Online EHR Datasets
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     PAGE 1: DESIGN SYSTEM SANDBOX
+                     ========================================== -->
+                <section id="designSystem" class="page-view">
+                    <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 24px;">
+                        This design system showcase illustrates the UI component primitives used throughout DischargeIQ, providing developers and reviewers a unified handoff template.
+                    </p>
+
+                    <div class="ds-grid">
+                        <!-- Colors Swatches -->
+                        <div class="ds-section">
+                            <h3 class="ds-section-title">Color Palette</h3>
+                            <div class="color-swatches">
+                                <div class="swatch" style="background-color: var(--primary);">
+                                    <span>Primary (Blue)</span>
+                                    <span class="swatch-hex">#2563EB</span>
+                                </div>
+                                <div class="swatch" style="background-color: var(--success);">
+                                    <span>Success</span>
+                                    <span class="swatch-hex">#10B981</span>
+                                </div>
+                                <div class="swatch" style="background-color: var(--warning);">
+                                    <span>Warning</span>
+                                    <span class="swatch-hex">#F59E0B</span>
+                                </div>
+                                <div class="swatch" style="background-color: var(--danger);">
+                                    <span>Danger</span>
+                                    <span class="swatch-hex">#EF4444</span>
+                                </div>
+                                <div class="swatch" style="background-color: var(--background); color: var(--text-primary); border: 1px solid var(--border);">
+                                    <span>Background</span>
+                                    <span class="swatch-hex">#F8FAFC</span>
+                                </div>
+                                <div class="swatch" style="background-color: var(--card-bg); color: var(--text-primary); border: 1px solid var(--border);">
+                                    <span>Card Fill</span>
+                                    <span class="swatch-hex">#FFFFFF</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Typography -->
+                        <div class="ds-section">
+                            <h3 class="ds-section-title">Typography Scale</h3>
+                            <div class="ds-typography">
+                                <div>
+                                    <span style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 4px;">Heading 1 (Inter Bold)</span>
+                                    <h1 style="font-size: 24px; font-weight: 700;">DischargeIQ Design</h1>
+                                </div>
+                                <div>
+                                    <span style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 4px;">Heading 3 (Inter SemiBold)</span>
+                                    <h3 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Patient Clinical Profile</h3>
+                                </div>
+                                <div>
+                                    <span style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 4px;">Body Regular (Inter Regular)</span>
+                                    <p style="font-size: 14px; line-height: 1.5; color: var(--text-secondary);">
+                                        Healthcare dashboards work best when they highlight only the most important KPIs and minimize unnecessary scrolling.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Buttons & Controls -->
+                        <div class="ds-section">
+                            <h3 class="ds-section-title">Action Components (Buttons)</h3>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn btn-primary">Primary Button</button>
+                                    <button class="btn btn-secondary">Secondary</button>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn btn-outline">Outline Action</button>
+                                    <button class="btn btn-danger">Danger Alert</button>
+                                </div>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <button class="btn btn-primary btn-sm">Small Primary</button>
+                                    <span style="font-size: 12px; color: var(--text-muted);">Form-action sizes</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Badges and Statuses -->
+                        <div class="ds-section">
+                            <h3 class="ds-section-title">Status Indicators</h3>
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    <span class="badge badge-pending">Pending</span>
+                                    <span class="badge badge-review">Review</span>
+                                    <span class="badge badge-approved">Approved</span>
+                                    <span class="badge badge-discharged">Discharged</span>
+                                </div>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <span class="risk-badge risk-low">Low Risk</span>
+                                    <span class="risk-badge risk-medium">Med Risk</span>
+                                    <span class="risk-badge risk-high">High Risk</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Primitives -->
+                        <div class="ds-section" style="grid-column: span 1;">
+                            <h3 class="ds-section-title">Form Input Controls</h3>
+                            <div class="form-group">
+                                <label class="form-label">Default Text Field</label>
+                                <input class="input-field" type="text" placeholder="Enter clinical parameter...">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Drop-down Selector</label>
+                                <select class="input-field select-field">
+                                    <option>Option One - Cardiopulmonary</option>
+                                    <option>Option Two - Electroencephalography</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ==========================================
+         MODAL: REGISTER NEW PATIENT
+         ========================================== -->
+    <div class="modal-overlay" id="newPatientModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 style="font-size: 15px; font-weight:700; color:var(--text-primary);">Register New Inpatient Dossier</h3>
+                <button onclick="closeNewPatientModal()" style="background:none; border:none; cursor:pointer; font-size:22px; color:var(--text-muted); font-weight:700; line-height:1;">&times;</button>
+            </div>
+            <form id="newPatientForm" onsubmit="event.preventDefault(); submitNewPatient();">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label" for="newPatName">Patient Full Name</label>
+                        <input class="input-field" type="text" id="newPatName" placeholder="e.g. John Miller" required>
+                    </div>
+                    <div style="display:flex; gap:16px;">
+                        <div class="form-group" style="flex:1;">
+                            <label class="form-label" for="newPatAge">Age</label>
+                            <input class="input-field" type="number" id="newPatAge" min="0" max="120" placeholder="e.g. 54" required>
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label class="form-label" for="newPatGender">Gender</label>
+                            <select class="input-field select-field" id="newPatGender">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="newPatDept">Admitting Department</label>
+                        <select class="input-field select-field" id="newPatDept">
+                            <option value="Cardiology">Cardiology</option>
+                            <option value="Neurology">Neurology</option>
+                            <option value="Orthopedics">Orthopedics</option>
+                            <option value="Pediatrics">Pediatrics</option>
+                            <option value="General Medicine">General Medicine</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="newPatDiag">Primary Admitting Diagnosis</label>
+                        <input class="input-field" type="text" id="newPatDiag" placeholder="e.g. Acute Cholecystitis" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary btn-sm" type="button" onclick="closeNewPatientModal()">Cancel</button>
+                    <button class="btn btn-primary btn-sm" type="submit">Register Patient</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL: INTEROPERABILITY INSPECTOR (HL7 / FHIR)
+         ========================================== -->
+    <div class="modal-overlay" id="interopModal" style="z-index: 1002;">
+        <div class="modal-card" style="width: 800px; max-width: 95%;">
+            <div class="modal-header">
+                <h3 style="font-size: 15px; font-weight:700; color:var(--text-primary);">EHR Interoperability Inspector (HL7 v2 & FHIR JSON)</h3>
+                <button onclick="closeInteropModal()" style="background:none; border:none; cursor:pointer; font-size:22px; color:var(--text-muted); font-weight:700; line-height:1;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px; display:flex; flex-direction:column; gap:16px;">
+                <p style="font-size: 13px; color: var(--text-secondary);">
+                    Generate standardized HL7 v2 segments or FHIR Resources representing this patient's clinical state for transmission to external systems (Epic, Cerner, or state health registries).
+                </p>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary btn-sm active" id="btnTabFHIR" onclick="toggleInteropTab('FHIR')" style="font-weight:600; border-radius:var(--radius-sm);">🔥 FHIR JSON Resource</button>
+                    <button class="btn btn-secondary btn-sm" id="btnTabHL7" onclick="toggleInteropTab('HL7')" style="font-weight:600; border-radius:var(--radius-sm);">🧬 HL7 v2.5.1 Message (REF^I12)</button>
+                </div>
+                <div class="code-viewer-block" style="background:#0F172A; color:#E2E8F0; padding:16px; border-radius:6px; font-family:'JetBrains Mono', 'Fira Code', monospace; font-size:12px; height: 350px; overflow: auto; white-space: pre; border: 1px solid #1E293B;">
+                    <code id="interopCodeContent"></code>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm" type="button" onclick="closeInteropModal()">Close</button>
+                <button class="btn btn-primary btn-sm" type="button" onclick="copyInteropCode()">📋 Copy to Clipboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
+
